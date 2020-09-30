@@ -1,9 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import io from 'socket.io-client';
 import logo from './logo.svg';
 import { Counter } from './features/counter/Counter';
 import './App.css';
 
 function App() {
+  const [data, setData] = useState({});
+
+  useEffect(() => {
+    const socket = io();
+    const callAPI = async () => {
+      const res = await fetch('/users');
+      const data = await res.json();
+      setData(data);
+    };
+    callAPI();
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(data).length > 0) {
+      console.log(data);
+    }
+  }, [data]);
   return (
     <div className="App">
       <header className="App-header">
