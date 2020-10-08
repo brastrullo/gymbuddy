@@ -12,11 +12,11 @@ module.exports = (io) => {
 
     const time = `${new Date()}`;
     console.log('new connection');
-    socket.broadcast.emit('connection', time);
 
-    socket.on('join', ({ name, roomID }, callback) => {
+    socket.on('join room', ({ name, roomID }, callback) => {
       console.log(name, roomID);
       callback('server', `${name} joined ${roomID}`);
+      socket.broadcast.emit('connected chat message', name, time);
     });
 
     socket.on('disconnect', () => {

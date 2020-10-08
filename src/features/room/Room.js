@@ -15,21 +15,26 @@ export function Room(props) {
   // const [connectedUsers, setConnectedUsers] = useState({});
   useEffect(() => {
     socket = io();
-    console.log({ socket });
 
     const qsName = query.get('name');
     setName(qsName);
 
-    socket.on('connection', (time) => {
+    /* message from the server about someone connecting */
+    socket.on('connected chat message', (who, time) => {
+      console.log('received connected chat message', who, time)
       setChatLog([
         ...chatLog,
-        { sender: qsName, message: `connected ${time}` },
+        { sender: who, message: `connected ${time}` },
       ]);
     });
 
-    socket.emit('join', { name: qsName, roomID }, (sender, message) => {
-      console.log({ sender, message });
-      setChatLog([...chatLog, { sender, message }]);
+    /* this is the one called automatically by the library, when the conneection is successfully set up from client to server */
+    socket.on('connect', () => {
+      console.log('socket connected to the server')
+      socket.emit('join room', { name: qsName, roomID }, (sender, message) => {
+        console.log('got join room callback', { sender, message });
+        setChatLog([...chatLog, { sender, message }]);
+      });
     });
 
     return () => {
@@ -39,7 +44,6 @@ export function Room(props) {
   }, [location.search]);
 
   useEffect(() => {
-    console.log(chatLog);
   }, [chatLog]);
 
   function useQuery() {
@@ -59,8 +63,8 @@ export function Room(props) {
       );
     };
 
+    console.log('heres the chatlog', chatLog)
     const messageList = chatLog.map((obj, i) => {
-      console.log({ obj }, obj.sender, obj.message);
       return (
         <Message key={`msg${i}`} sender={obj.sender} message={obj.message} />
       );
